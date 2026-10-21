@@ -2,6 +2,10 @@ name: Public persistence regression validation
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/validate-persistence.yml
 
 permissions:
   contents: read
@@ -36,6 +40,11 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        with:
+          workspaces: backend
 
       - name: Rustfmt check
         run: cargo fmt --manifest-path backend/Cargo.toml --all -- --check
