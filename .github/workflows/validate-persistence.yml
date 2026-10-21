@@ -1,0 +1,49 @@
+name: Public persistence regression validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  persistence:
+    name: Rust + PostgreSQL 17 (public)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: mediafusion
+          POSTGRES_PASSWORD: mediafusion
+          POSTGRES_DB: mediafusion
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mediafusion -d mediafusion"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Check out exact upstream candidate branch
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: fix/persist-live-scrape-playback
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@67ef31d5b988238dd797d409d6f9574278e20537 # stable
+        with:
+          toolchain: stable
+          components: rustfmt
+
+      - name: Rustfmt check
+        run: cargo fmt --manifest-path backend/Cargo.toml --all -- --check
+
+      - name: Rust compile check
+        run: cargo check --manifest-path backend/Cargo.toml --lib --no-default-features --features tls-rustls
+
+      - name: Four PostgreSQL regression tests
+        env:
+          TEST_DATABASE_URL: postgresql://mediafusion:mediafusion@127.0.0.1:5432/mediafusion
+        run: cargo test --manifest-path backend/Cargo.toml --no-default-features --features tls-rustls --test mediafusion_persistence -- --nocapture
