@@ -52,7 +52,7 @@ jobs:
       - name: Rust compile check
         run: cargo check --manifest-path backend/Cargo.toml --lib --no-default-features --features tls-rustls
 
-      - name: Five PostgreSQL regression tests (including concurrent hash writes)
+      - name: Five PostgreSQL regression tests (forced ON CONFLICT path)
         env:
           TEST_DATABASE_URL: postgresql://mediafusion:mediafusion@127.0.0.1:5432/mediafusion
         run: cargo test --manifest-path backend/Cargo.toml --no-default-features --features tls-rustls --test mediafusion_persistence -- --nocapture
