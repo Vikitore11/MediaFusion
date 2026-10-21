@@ -52,7 +52,7 @@ jobs:
       - name: Rust compile check
         run: cargo check --manifest-path backend/Cargo.toml --lib --no-default-features --features tls-rustls
 
-      - name: Five PostgreSQL regressions (deterministic ON CONFLICT)
+      - name: Five PostgreSQL regressions (distinct episodes and ON CONFLICT)
         env:
           TEST_DATABASE_URL: postgresql://mediafusion:mediafusion@127.0.0.1:5432/mediafusion
         run: cargo test --manifest-path backend/Cargo.toml --no-default-features --features tls-rustls --test mediafusion_persistence -- --nocapture
